@@ -4,7 +4,7 @@ PortSystem          1.0
 PortGroup           conflicts_build 1.0
 
 name                omniORB
-version             4.2.4
+version             4.3.2
 categories          devel
 universal_variant   no
 # executables are GPL, libs are LGPL
@@ -20,12 +20,10 @@ conflicts_build     ${name}
 
 master_sites        sourceforge:project/omniorb/omniORB/omniORB-${version}/
 use_bzip2           yes
-checksums           rmd160  bc955f62f794f7c5bea8d74e15e0f6621dbd6c86 \
-                    sha256  28c01cd0df76c1e81524ca369dc9e6e75f57dc70f30688c99c67926e4bdc7a6f \
-                    size    2713397
+checksums           rmd160  d217c9c90ead46f4ad26abc03c81606795122146 \
+                    sha256  1c745330d01904afd7a1ed0a5896b9a6e53ac1a4b864a48503b93c7eecbf1fa8 \
+                    size    2614418
 
-patchfiles          patch-configure.diff \
-                    src_tool_omniidl_cxx_cccp_config-darwin.h.diff
 post-patch {
     reinplace "s|\\(\$(CXXLINKOPTIONS)\\)|\\1 [get_canonical_archflags cxx]|g" \
         ${worksrcpath}/mk/beforeauto.mk.in
@@ -45,7 +43,7 @@ if {${build_arch} eq "x86_64" && ${os.platform} eq "darwin"} {
 # force a global variable
 set python_framework []
 
-variant python38 conflicts python39 description {Build Python 3.8 IDL support} {
+variant python38 conflicts python39 python310 python311 python312 description {Build Python 3.8 IDL support} {
     configure.python            ${prefix}/bin/python3.8
     set python_framework        ${frameworks_dir}/Python.framework/Versions/3.8/lib
     depends_lib-append          port:python38
@@ -54,7 +52,7 @@ variant python38 conflicts python39 description {Build Python 3.8 IDL support} {
     notes "Install py38-omniORBpy for omniORBpy."
 }
 
-variant python39 conflicts python38 description {Build Python 3.9 IDL support} {
+variant python39 conflicts python38 python310 python311 python312 description {Build Python 3.9 IDL support} {
     configure.python            ${prefix}/bin/python3.9
     set python_framework        ${frameworks_dir}/Python.framework/Versions/3.9/lib
     depends_lib-append          port:python39
@@ -63,8 +61,37 @@ variant python39 conflicts python38 description {Build Python 3.9 IDL support} {
     notes "Install py39-omniORBpy for omniORBpy."
 }
 
-if {![variant_isset python38]} {
-    default_variants +python39
+variant python310 conflicts python38 python39 python311 python312 description {Build Python 3.10 IDL support} {
+    configure.python            ${prefix}/bin/python3.10
+    set python_framework        ${frameworks_dir}/Python.framework/Versions/3.10/lib
+    depends_lib-append          port:python310
+    configure.pkg_config_path   ${python_framework}/lib/pkgconfig
+
+    notes "Install py310-omniORBpy for omniORBpy."
+}
+
+variant python311 conflicts python38 python39 python310 python312 description {Build Python 3.11 IDL support} {
+    configure.python            ${prefix}/bin/python3.11
+    set python_framework        ${frameworks_dir}/Python.framework/Versions/3.11/lib
+    depends_lib-append          port:python311
+    configure.pkg_config_path   ${python_framework}/lib/pkgconfig
+
+    notes "Install py311-omniORBpy for omniORBpy."
+}
+
+variant python312 conflicts python38 python39 python310 python311 description {Build Python 3.12 IDL support} {
+    configure.python            ${prefix}/bin/python3.12
+    set python_framework        ${frameworks_dir}/Python.framework/Versions/3.12/lib
+    depends_lib-append          port:python312
+    configure.pkg_config_path   ${python_framework}/lib/pkgconfig
+
+    notes "Install py312-omniORBpy for omniORBpy."
+}
+
+if {![variant_isset python38] && ![variant_isset python39]
+    && ![variant_isset python310] && ![variant_isset python311]
+    && ![variant_isset python312]} {
+    default_variants +python312
 }
 
 variant ssl description {Enable SSL support} {
